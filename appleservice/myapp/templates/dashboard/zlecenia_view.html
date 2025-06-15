@@ -1,0 +1,367 @@
+{% extends "dashboard.html" %} {% block title %} Widok {% endblock %}
+{% block zl_activity %}active{% endblock %}
+{% block board %}
+{% load static %}
+
+{% if zlecenie.id_lokacji.nazwa_lokacji ==  session_location %}
+<form method="post">
+  {% csrf_token %}
+  {% load widget_tweaks %}
+
+  <h2 class="px-3"><strong>Zlecenie:</strong> {{zlecenie.id_zlecenia}}</h2>
+  <!-- names -->
+  <style>
+    .row{
+      padding-left: 0;
+      padding-right: 0;
+      --bs-gutter-x: 0;
+      border-bottom: 1px solid rgba(0,0,0,.125);
+      border-top: 1px solid rgba(0,0,0,.125);
+    }
+    .list-group-item{
+      border: 0;
+    }
+    .btn-group{
+      padding: .75rem;
+    }
+    .submit-row{
+      background-color: rgb(232, 232, 232);
+      border: 1px solid rgba(0,0,0,.125);
+      border-radius: .25rem;
+    }
+    th{
+      padding-left: 1rem;
+    }
+    .form-check-input{
+      margin-top: .06rem;
+    }
+    .formset-check-done:checked{
+      background-color: #198754;
+      border-color: #198754;
+    }
+    .formset-check-delete:checked{
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+    .-confirm{
+      background: #00000044;
+      width: 100%;
+      height: 100%; 
+      z-index: 999;
+      top: 0; 
+      left: 0; 
+      position: fixed;
+      display: none;
+    }
+  </style>
+  <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white mt-3 col-xl-6 px-3">
+    <div class="list-group list-group-flush scrollarea">
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Klient [{{zlecenie.id_klienta.id}}]</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">{{zlecenie.id_klienta.imie}} {{zlecenie.id_klienta.nazwisko}} <em>({{zlecenie.id_klienta.email}} | {{zlecenie.id_klienta.telefon}})</em>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a  class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Pracownik [{{zlecenie.id_pracownika.id}}]</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a  class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">{{zlecenie.id_pracownika.imie}} {{zlecenie.id_pracownika.nazwisko}}
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Status zlecenia</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <div class="btn-group">
+            <a class="pe-none btn btn-{% if zlecenie.status_zlecenia == 0 %}danger{% elif zlecenie.status_zlecenia == 1%}warning{% elif zlecenie.status_zlecenia == 2%}success{% else %}secondary{% endif %}" id="statusDropdownButton">
+              {{zlecenie.get_status_zlecenia_display}}
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Termin wizyty</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">{{zlecenie.termin_zlecenia|date:"d.m.Y, H:i"}}</div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Termin realizacji</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">{{zlecenie.termin_realizacji|date:"d.m.Y, H:i"|default:"Not set"}}</div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Model urządzenia</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">
+              {% if zlecenie.status_zlecenia == 1 %}
+              <input type="text" class="form-control" name="_model" placeholder="" value="{{ zlecenie.model }}"> 
+              {% else %}
+              {{ zlecenie.model }}
+              {% endif %}
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Numer seryjny urządzenia</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">
+              {% if zlecenie.status_zlecenia == 1 %}
+              <input type="text" class="form-control" name="_serial_nr" placeholder="" value="{{ zlecenie.nr_seryjny }}"> 
+              {% else %}
+              {{ zlecenie.nr_seryjny }}
+              {% endif %}
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Pakiet diagnostyczny</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">
+              {% if zlecenie.pakiet_diagnostyczny %} TAK {% else %} BRAK {% endif %}
+            </div>
+          </a>
+        </div>
+      </div>
+      {% if zlecenie.pakiet_diagnostyczny %} 
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Diagnoza</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">
+              {% if zlecenie.status_zlecenia == 1 %}
+              <textarea class="form-control" spellcheck="false" style="min-height: 100px; max-height: 300px;" name="_diagnoza">{{ zlecenie.diagonza }}</textarea>
+              {% else %}
+              {{ zlecenie.diagonza }}
+              {% endif %}
+            </div>
+          </a>
+        </div>
+      </div>
+      {% endif %}
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Opis, uwagi</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">
+              {% if zlecenie.status_zlecenia == 1 %}
+              <textarea class="form-control" spellcheck="false" style="min-height: 100px; max-height: 300px;" name="_notes">{{ zlecenie.notes }}</textarea>
+              {% else %}
+              {{ zlecenie.notes }}
+              {% endif %}
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Usługi</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            {{ formset.management_form }}
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Do zrobienia</th>
+                  <th>Cena (zł)</th>
+                  <th>Wykonano</th>
+                  {% if zlecenie.status_zlecenia == 1 %}
+                  <th>Usuń</th>
+                  {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% if zlecenie.status_zlecenia == 1 %}
+                  {% for form in formset %}
+                  {{ form.id }}
+                    <tr>
+                      <td>{{ form.service|add_class:"form-control formset-field" }}</td>
+                      <td>{{ form.price|add_class:"form-control formset-field price-field" }}</td>
+                      <td class="text-center align-middle">{{ form.done|add_class:"form-check-input formset-check-done" }}</td>
+                      {% if form.DELETE %}
+                      <td class="text-center align-middle">{{ form.DELETE|add_class:"form-check-input formset-check-delete" }}</td>
+                      {% endif %}
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  {% for form in formset %}
+                    {% if form.service.value != None %}
+                    {{ form.id }}
+                    <tr>
+                      <td>{{ form.service.value }}</td>
+                      <td>{{ form.price.value }} zł</td>
+                      <td>{{ form.done|add_class:"form-check-input formset-check-done" }}</td>
+                    </tr>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+            {% if zlecenie.status_zlecenia == 1 %}
+            <button type="button" name="add_another" class="btn btn-success">
+              Dodaj kolejne...
+            </button>
+            {% endif %}
+          </a>
+        </div>
+      </div>
+      <div class="submit-row row">
+        <div class="col-xl-3 btn-group">
+          {% if zlecenie.status_zlecenia == 0 %}
+          <button type="submit" name="action" value="take" class="btn btn-success">
+            Pobierz zlecenie
+          </button>
+          {% elif zlecenie.status_zlecenia == 1 %}
+          <button type="submit" name="action" value="finish" class="btn btn-danger">
+            Zakończ zlecenie
+          </button>
+          {% elif zlecenie.status_zlecenia == 2 %}
+          <button type="submit" name="action" value="archive" class="btn btn-secondary">
+            Zarchiwizuj zlecenie
+          </button>
+          {% elif zlecenie.status_zlecenia == 3 %}
+          <button type="submit" name="action" value="renew" class="btn btn-warning">
+            Wznów zlecenie
+          </button>
+          {% endif %}
+        </div>
+        <div class="col-xl-3 btn-group">
+          {% if zlecenie.status_zlecenia == 1 %}
+          <button type="submit" name="action" value="SAVE" class="btn btn-secondary SAVEBUTTON">
+            ZAPISZ
+          </button>
+          {% endif %}
+        </div>
+        <div class="col-xl-3 btn-group">
+        </div>
+        <div class="col-xl-3 btn-group">
+          <button type="submit" name="action" value="DELETE" class="btn btn-danger">
+            <strong>USUŃ ZLECENIE</strong>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+<script>
+  $("button[name='action']").click(function() {
+    var act = $(this).text()
+    if ($(this).attr('value') != 'SAVE'){
+      var c = confirm("Potwierdź akcję: " + act);
+    }
+    return c;
+  });
+
+  var next_id = $('table.table tr').length - 1
+
+  $("button[name='add_another']").click(function(event) {
+    event.preventDefault();
+    var next_row = $('<tr><td><input type="text" name="usluga-' + next_id + '-service" maxlength="256" class="form-control formset-field" id="id_usluga-' + next_id + '-service"></td><td><input type="number" name="usluga-' + next_id + '-price" step="0.01" class="form-control formset-field" id="id_usluga-' + next_id + '-price"></td><td class="text-center align-middle"><input type="checkbox" name="usluga-' + next_id + '-done" class="form-check-input formset-check-done" id="id_usluga-' + next_id + '-done"></td><td class="text-center align-middle"><input type="checkbox" name="usluga-' + next_id + '-DELETE" class="form-check-input formset-check-delete" id="id_usluga-' + next_id + '-DELETE"></td></tr>');
+    $('tbody').append($('<input type="hidden" name="usluga-' + next_id + '-id" id="id_usluga-' + next_id + '-id">'))
+    $('table.table').append(next_row)
+    $("input[name='usluga-TOTAL_FORMS']").attr('value', parseInt($("input[name='usluga-TOTAL_FORMS']").attr('value')) + 1)
+    next_id++
+  });
+
+  $(".form-check-input").click(function (){
+    $(".SAVEBUTTON").removeClass("btn-secondary")
+    $(".SAVEBUTTON").addClass("btn-primary")
+  })
+  $(".form-control").keyup(function (){
+    $(".SAVEBUTTON").removeClass("btn-secondary")
+    $(".SAVEBUTTON").addClass("btn-primary")
+  })
+
+  $(".SAVEBUTTON").click(function (){
+    $("tbody tr").each(function (i, row) {
+      if($(row).find(".formset-field").val() == '' || $(row).find(".price-field").val() == ''){
+        $(row).find(".formset-check-delete").prop( "checked", true )
+      }
+    })
+  })
+</script>
+{% else %}
+<strong>BRAK UPRAWNIEŃ! (Zlecenie salonu: {{ zlecenie.id_lokacji.nazwa_lokacji }}) </strong>
+{% endif %}
+
+{% endblock %}

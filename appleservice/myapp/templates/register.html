@@ -1,0 +1,68 @@
+{% extends "sign-in.html" %} {% block title %} Utwórz konto {% endblock %}
+{% block form %}
+{% load static %}
+<form method="post" action="{% url 'Register' %}" autocomplete="off">
+  {% csrf_token %}
+
+  <h1 class="h1 mb-3 fw-normal">🍎</h1>
+  <h3 class="h3 mb-1 fw-normal">● &nbsp; Zarejestruj się &nbsp; ●</h3>
+  <h6 class="h6 mb-3 fw-normal text-muted">Utwórz swoje konto klienta, aby skorzystać z naszych usług...</h6>
+
+  <div class="form-floating text-muted">
+    <input type="text" class="form-control ff_top" id="firstName" name="firstName" placeholder="" required>
+    <label for="floatingInput">Imię</label>
+  </div>
+
+  <div class="form-floating text-muted">
+    <input type="text" class="form-control ff_bottom" id="lastName" name="lastName" placeholder="" required>
+    <label for="floatingInput">Nazwisko</label>
+  </div>
+
+  <div class="mb-4"></div>
+
+  <div class="form-floating text-muted">
+    <input type="email" class="form-control ff_top" id="email" name="email" placeholder="" required>
+    <label for="floatingInput">Adres e-mail</label>
+  </div>
+
+  <div class="form-floating text-muted">
+    <input type="password" class="form-control ff_bottom" id="password" name="password" minlength="8" maxlength="20" placeholder="" required>
+    <label for="floatingPassword">Hasło (8-20 znaków)</label>
+  </div>
+
+  <div class="mb-4"></div>
+
+  <div class="form-floating text-muted">
+    <input type="tel" class="form-control" id="phone" name="phone" placeholder="">
+    <label for="floatingInput">Numer telefonu (Opcjonalne)</label>
+  </div> 
+
+  <div class="mb-1"></div>
+
+  <div class="text-muted">
+      <label for="floatingInput"></label>
+      <select id="inputLocation" class="form-select text-muted" name="location" disabled>
+        <option class="text-muted" selected>Wybierz lokację...</option>
+        {%for loc in locations%}
+        <option value="{{loc.nazwa_lokacji}}">
+          <strong>{{ loc.miasto }}</strong> ({{ loc.nazwa_lokacji }})
+        </option>
+        {% endfor %}
+      </select>
+  </div>
+
+  <div class="checkbox mt-4 mb-4 text-start">
+    <label class="checkbox">
+      <input type="checkbox" value="worker" name="is_worker" id="is_worker"> Konto pracownika
+    </label>
+  </div>
+
+  <button class="w-100 btn btn-lg btn-primary mb-2" type="submit" id="proceedBtn">Utwórz konto</button>
+  <a href="{% url 'Login' %}" class="text-decoration-underline">Zaloguj się</a>
+
+  <p class="mt-3 text-muted">© 2025</p>
+</form>
+{% if message %}
+  <p style="color: red;">{{ message }}</p>
+{% endif %}
+{% endblock %}

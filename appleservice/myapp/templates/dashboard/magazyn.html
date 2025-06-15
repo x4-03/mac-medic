@@ -1,0 +1,30 @@
+{% extends "dashboard.html" %} {% block title %} Magazyn {% endblock %}
+{% block ma_activity %}active{% endblock %}
+{% block board %}
+{% load static %}
+<h2><strong>Magazyn</strong> <em>{{ session_location }}</em></h2>
+<div class="table-responsive">
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        {% for title in zlecenia_titles %}
+        <th scope="col">{{ title }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for zl in zlecenia%}
+      <tr class="dashbar">
+        <td>{{ zl.id_zlecenia }}</td>
+        <td>{{ zl.id_klienta.id }}</td>
+        <td>{{ zl.id_pracownika.id }}</td>
+        <td>{{ zl.status_zlecenia }}</td>
+        <td>{{ zl.termin_zlecenia }}</td>
+        <td>{{ zl.termin_realizacji }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

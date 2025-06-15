@@ -1,0 +1,379 @@
+{% extends "dashboard.html" %} {% block title %} Widok {% endblock %}
+
+{% block fa_activity %}active{% endblock %}
+
+{% block board %}
+{% load static %}
+
+{% if zlecenie.id_lokacji.nazwa_lokacji ==  session_location %}
+{% csrf_token %}
+{% load widget_tweaks %}
+
+<style>
+  .row{
+    padding-left: 0;
+    padding-right: 0;
+    --bs-gutter-x: 0;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    border-top: 1px solid rgba(0,0,0,.125);
+  }
+  .CONTAINERROW{
+    border: 0;
+  }
+  .list-group-item{
+    border: 0;
+  }
+  .btn-group{
+    padding: .75rem;
+  }
+  .submit-row{
+    background-color: rgb(232, 232, 232);
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+  }
+  th{
+    padding-left: 1rem;
+  }
+  .form-check-input{
+    margin-top: .06rem;
+  }
+  .formset-check-done:checked{
+    background-color: #198754;
+    border-color: #198754;
+  }
+  .formset-check-delete:checked{
+    background-color: #dc3545;
+    border-color: #dc3545;
+  }
+  .-confirm{
+    background: #00000044;
+    width: 100%;
+    height: 100%; 
+    z-index: 999;
+    top: 0; 
+    left: 0; 
+    position: fixed;
+    display: none;
+  }
+  .A4{
+    aspect-ratio: 1 / 1.4142;
+    background-color: white;
+    border: 1px solid #acacac;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 60%;
+    position: relative; /* so you can absolutely position children later */
+    overflow: hidden; /* optional, prevents overflow if content is too big */
+  }
+  @media print {
+    body * {
+      visibility: hidden;  /* hide everything */
+    }
+    .A4, .A4 * {
+      visibility: visible;  /* show only a4-wrapper and its children */
+    }
+    .A4 {
+      position: absolute;  /* place it at top-left */
+      left: 0;
+      top: 0;
+      width: 210mm; /* A4 width */
+      height: 297mm; /* A4 height */
+    }
+  }
+</style>
+
+<div class="row CONTAINERROW mt-2">
+  <!--COLUMN 1 START-->
+  <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white col-xl-6 px-3">
+    <h2><strong>Faktura do zlecenia:</strong> {{zlecenie.id_zlecenia}}</h2>
+    <div class="list-group list-group-flush scrollarea mt-2">
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Klient</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <form method="post">
+            {% csrf_token %}
+            <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+              <div class="col-10 mb-1 row CONTAINERROW">
+                <div class="col-3 mx-1 my-1">
+                  <input type="text" class="form-control" name="imie" placeholder="Imie" value="{{zlecenie.id_klienta.imie}}" required>
+                </div>
+                <div class="col-3 mx-1 my-1">
+                  <input type="text" class="form-control" name="nazwisko" placeholder="Nazwisko" value="{{zlecenie.id_klienta.nazwisko}}" required>
+                </div>
+                <div class="col-5 mx-1 my-auto">
+                  <em>({{zlecenie.id_klienta.email}} | {{zlecenie.id_klienta.telefon}})</em>
+                </div>
+              </div>
+              <div class="col-10 mb-1 row CONTAINERROW">
+                <div class="col-6 mx-1 my-1">
+                  <input type="text" class="form-control" name="adres" placeholder="Adres" value="{{zlecenie.id_klienta.adres}}">
+                </div>
+                <div class="col-3 mx-1 my-1">
+                  <input type="text" class="form-control" name="kod_pocztowy" placeholder="Kod pocztowy" value="{{zlecenie.id_klienta.kod_pocztowy}}">
+                </div>
+                <div class="col-6 mx-1 my-1 mt-2">
+                  <input type="text" class="form-control" name="miasto" placeholder="Miasto" value="{{zlecenie.id_klienta.miasto}}">
+                </div>
+              </div>
+              <div class="col-10 mb-1 row CONTAINERROW">
+                <div class="col-4 mx-1 my-1">
+                  <input type="text" class="form-control" name="firma" placeholder="Firma" value="{{zlecenie.id_klienta.firma}}">
+                </div>
+                <div class="col-5 mx-1 my-1">
+                  <input type="text" class="form-control" name="nip" placeholder="NIP" value="{{zlecenie.id_klienta.nip}}">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary m-1 mt-2 SAVEBUTTON">
+                Zapisz
+              </button>
+            </a>
+          </form>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a  class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Pracownik</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a  class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">{{zlecenie.id_pracownika.imie}} {{zlecenie.id_pracownika.nazwisko}}
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Termin wizyty</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">{{zlecenie.termin_zlecenia|date:"d.m.Y, H:i"}}</div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Termin realizacji zlecenia</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">{{zlecenie.termin_realizacji|date:"d.m.Y, H:i"|default:"Not set"}}</div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Model urządzenia</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">
+            {{ zlecenie.model }}
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Numer seryjny urządzenia</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">
+            {{ zlecenie.nr_seryjny }}
+            </div>
+          </a>
+        </div>
+      </div>
+      {% if zlecenie.pakiet_diagnostyczny %} 
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Diagnoza</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="col-10 mb-1">
+              {{ zlecenie.diagonza }}
+            </div>
+          </a>
+        </div>
+      </div>
+      {% endif %}
+      <div class="row">
+        <div class="col-xl-3">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            <div class="d-flex w-100 align-items-center justify-content-between">
+              <strong class="mb-1">Usługi</strong>
+            </div>
+          </a>
+        </div>
+        <div class="col-xl-9">
+          <a class="list-group-item list-group-item-action py-3 lh-tight" aria-current="true">
+            {{ formset.management_form }}
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Usługa</th>
+                  <th>Cena (zł)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for form in formset %}
+                  {% if form.service.value != None and form.done.value %}
+                  {{ form.id }}
+                  <tr>
+                    <td>{{ form.service.value }}</td>
+                    <td><span class="price">{{ form.price.value }} </span> zł </td>
+                  </tr>
+                  {% endif %}
+                {% endfor %}
+                <tr>
+                  <td><strong>SUMA NETTO:</strong></td>
+                  <td><strong><span class="netto"></span> zł </strong></td>
+                </tr>
+                <tr>
+                  <td><strong>SUMA BRUTTO:</strong> (23% VAT) </td>
+                  <td><strong><span class="brutto"></span> zł </strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </a>
+        </div>
+      </div>
+      <div class="submit-row row">
+        <div class="col-xl-9"></div>
+        <div class="col-xl-3 btn-group">
+          <button type="button" id="PRINT" class="btn btn-primary">
+            <strong>DRUKUJ...</strong>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--COLUMN 1 END-->
+  <!--COLUMN 2 START-->
+  <div class="d-flex align-items-center justify-content-center col-xl-6 px-3 mt-5">
+    <div class="mx-auto A4 p-4">
+      <div class="container-fluid p-4 d-flex flex-column h-100">
+        <!-- Nalowek -->
+        <div class="mb-2">
+          <h1 class="mb-0">🍎 <strong>MacMedic</strong> sp. z o.o.</h1>
+          <h4 class="text-muted mt-2">FAKTURA</h4>
+          <p class="text-muted small">Faktura nr: {{zlecenie.termin_realizacji|date:"YmdHis"}}</p>
+        </div>
+        <!-- Nalowek END -->
+        <!-- Info -->
+        <div class="row my-2">
+          <div class="col-6">
+            <h6 class="text-uppercase"><strong>Sprzedający</strong></h6>
+            <p class="mb-0">MacMedic sp. z o.o.</p>
+            <p class="mb-0 fw-light">ul. Długa 7</p>
+            <p class="mb-0 fw-light">Poznań, 61-850</p>
+            <p class="mb-0 fw-light">NIP: 456-123-90-78</p>
+          </div>
+          <div class="col-6 text-end">
+            <h6 class="text-uppercase"><strong>Klient</strong></h6>
+            <p class="mb-0">{% if zlecenie.id_klienta.firma %} {{zlecenie.id_klienta.firma}} {% else %}{{zlecenie.id_klienta.imie}} {{zlecenie.id_klienta.nazwisko}} {% endif %}</p>
+            <p class="mb-0 fw-light">{{zlecenie.id_klienta.adres}}</p>
+            <p class="mb-0 fw-light">{{zlecenie.id_klienta.miasto}} {{zlecenie.id_klienta.kod_pocztowy}}</p>
+            {% if zlecenie.id_klienta.firma %} <p class="mb-0 fw-light">NIP: {{zlecenie.id_klienta.nip}}</p> {% endif %}
+          </div>
+        </div>
+        <!-- Info END-->
+        <!-- Uslugi cena bla bla -->
+        <div class="flex-grow-1 my-1">
+          <table class="table table-bordered text-center align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Usługa <em>(Urządzenie: {{ zlecenie.model }})</em></th>
+                <th>Cena (zł)</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for form in formset %}
+                  {% if form.service.value != None and form.done.value %}
+                  {{ form.id }}
+                  <tr>
+                    <td class="text-start">{{ form.service.value }}</td>
+                    <td class="text-end">{{ form.price.value }} zł </td>
+                  </tr>
+                  {% endif %}
+                {% endfor %}
+                <tr>
+                  <td class="text-start"><strong>Suma:</strong> [ <span class="netto"></span>zł + <span class="tax"></span>zł (23% VAT) ]</td>
+                  <td class="text-end"><strong><span class="brutto"></span> zł </strong></td>
+                </tr>
+              </tbody>
+          </table>
+        </div>
+        <!-- Uslugi cena bla bla END -->
+        <!-- footer -->
+        <div class="row mt-auto">
+          <div class="col-6">
+            <p class="mb-0">{{zlecenie.id_lokacji.miasto}}, {{zlecenie.termin_realizacji|date:"d.m.Y"}}</p>
+            <p class="mb-0">{{zlecenie.id_lokacji.adres}}, {{zlecenie.id_lokacji.kod_pocztowy}}</p>
+          </div>
+          <div class="col-6 text-end">
+            <p class="mb-5">&nbsp;</p>
+            <p class="text-end">_____________________________</p>
+            <p class="text-end"><em>Podpis</em></p>
+          </div>
+        </div>
+        <!-- footer END -->
+      </div>
+    </div>
+  </div>
+  <!--COLUMN 2 END-->
+</div>
+
+<script>
+  $(function() {
+    var netto = 0
+    $(".price").each( function () {
+      netto += parseFloat($(this).text())
+    })
+    var brutto = netto * 1.23
+    $(".netto").html(netto)
+    $(".tax").html(brutto - netto)
+    $(".brutto").html(brutto)
+  });
+
+  $("#PRINT").on("click", function () {
+    window.print();
+  });
+</script>
+
+{% else %}
+<strong>BRAK UPRAWNIEŃ! (Zlecenie salonu: {{ zlecenie.id_lokacji.nazwa_lokacji }}) </strong>
+{% endif %}
+
+{% endblock %}

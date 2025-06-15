@@ -1,0 +1,89 @@
+{% extends "dashboard.html" %} {% block title %} Zlecenia {% endblock %}
+{% block zl_activity %}active{% endblock %}
+{% block board %}
+{% load static %}
+<style>
+  .dashbar{
+    cursor: pointer;
+  }
+  mark {
+  background-color: rgb(212, 255, 76); /* Light yellow (brighter) */
+  color: black;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+</style>
+
+<h2 class="px-3"><strong>Zlecenia</strong> <em>{{ session_location }}</em></h2>
+<div class="p-3">
+  <input type="text" class="form-control w-25 SEARCH" placeholder="Szukaj..." value="">
+</div>
+<div class="table-responsive px-3">
+  <table class="table table-striped table-sm" id="example">
+    <thead>
+      <tr>
+        {% for title in zlecenia_titles %}
+        <th scope="col">{{ title }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody class="align-middle">
+      {% for zl in zlecenia %}
+        {% if zl.id_lokacji.nazwa_lokacji ==  session_location %}
+        <tr class="dashbar" href="{% url 'Zlecenia_view' zl.id_zlecenia %}">
+          <td>{{ zl.id_zlecenia }}</td>
+          <td>{{ zl.termin_zlecenia|date:"d.m.Y, H:i" }}</td>
+          <td>{{ zl.id_klienta.id }} ({{ zl.id_klienta.imie }} {{ zl.id_klienta.nazwisko }})</td>
+          <td>{{ zl.id_pracownika.id }}</td>
+          <td><a class="pe-none btn btn-{% if zl.status_zlecenia == 0 %}danger{% elif zl.status_zlecenia == 1%}warning{% elif zl.status_zlecenia == 2 %}success{% else %}secondary{% endif %}" id="statusDropdownButton">
+              {{zl.get_status_zlecenia_display}}
+            </a></td>
+          <td>{{ zl.termin_realizacji|date:"d.m.Y, H:i" }}</td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script type="text/javascript">
+$(function() {
+  $('.dashbar').click(function() {
+      var href = $(this).attr("href");
+      if(href) {
+          window.location = href;
+      }
+  });
+
+  $('.SEARCH').on('keyup', function () {
+    let SEARCH = $(this).val().toLowerCase();
+
+    $('#example tbody tr').each(function () {
+      let match = false;
+
+      $(this).find('td').each(function () {
+        if (!$(this).data('original')) {
+          $(this).data('original', $(this).html());
+        }
+
+        $(this).html($(this).data('original'));
+
+        if ($(this).text().toLowerCase().includes(SEARCH)) {
+          match = true;
+        }
+      });
+
+      if (match && SEARCH !== '') {
+        $(this).prependTo('#example tbody');
+
+        $(this).find('td').each(function () {
+          let html = $(this).html();
+          let regex = new RegExp('(' + SEARCH + ')', 'ig');
+          $(this).html(html.replace(regex, '<mark>$1</mark>'));
+        });
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "main.htm" %} {% block title %} signin {% endblock %}
+{% block content %}
+{% load static %}
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <script>alert("{{ message|escapejs }}");</script>
+    {% endfor %}
+  </ul>
+{% endif %}
+<link href="{% static 'sign-in.css' %}" rel="stylesheet">
+<script src="{% static 'sign-in.js' %}"></script>
+<style>
+  body {
+    display: flex;
+  }
+  .invalid {
+      background-color: rgb(255, 190, 190);
+    }
+  .form-signin {
+    border-radius: 1rem;
+  }
+</style>
+<div class="form-signin border text-center shadow">
+  {% block form %} {% endblock %}
+</div>
+  
+{% endblock %}

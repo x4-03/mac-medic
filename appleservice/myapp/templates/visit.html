@@ -1,0 +1,64 @@
+{% extends "sign-in.html" %} {% block title %} Umów wizytę {% endblock %}
+{% block form %}
+{% load static %}
+<form method="post" action="{% url 'Rezerwacja' %}" autocomplete="off">
+  {% csrf_token %}
+
+  <h1 class="h1 mb-3 fw-normal">🌐</h1>
+  <h3 class="h3 mb-1 fw-normal">● &nbsp; Zarezerwuj wizytę &nbsp; ●</h3>
+  <h6 class="h6 mb-4 fw-normal text-muted">Umów wizytę w jednym z naszych salonów...</h6>
+
+  <div class="input-group form-floating mb-3">
+    <input type="text" class="form-control" aria-label="Text input with dropdown button" value="" name="model" required>
+    <button class="btn btn-outline-secondary dropdown-toggle" style="border-top-right-radius: .3rem; border-bottom-right-radius: .3rem;" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+    <ul class="dropdown-menu dropdown-menu-end">
+      <li><a class="dropdown-item" href="#">📱 Iphone 16</a></li>
+      <li><a class="dropdown-item" href="#">📱 Iphone 16 Pro</a></li>
+      <li><a class="dropdown-item" href="#">📱 Iphone 15</a></li>
+      <li><a class="dropdown-item" href="#">📱 Iphone 14</a></li>
+      <li><a class="dropdown-item" href="#">📱 Ipad</a></li>
+      <li><a class="dropdown-item" href="#">⌚ Apple Watch</a></li>
+    </ul>
+    <label for="floatingSelect">📱 Modle urządzenia</label>
+  </div>
+
+  <div class="form-floating my-4">
+    <textarea type="text" class="form-control" id="notes" name="notes" value="" style="min-height: 100px; max-height: 200px;"></textarea>
+    <label for="floatingInput">❓ Powód wizyty (krótki opis)</label>
+  </div>
+
+  <div class="form-floating">
+    <select id="inputLocation" class="form-select" name="lokacja" style="line-height: 1.5; font-size: 90%">
+        {%for loc in locations%}
+        <option value="{{loc.nazwa_lokacji}}">
+          <strong>{{ loc.miasto }}</strong> ({{ loc.adres }})
+        </option>
+        {% endfor %}
+    </select>
+    <label for="floatingSelect">📍 Wybierz lokację</label>
+  </div>
+
+  <div class="row my-4">
+    <div class="form-floating text-muted col-8">
+      <input type="text" name="data" class="form-control" placeholder="data" required>
+      <label for="floatingPassword" style="padding-left: 1.5rem;">Data</label>
+    </div>
+    <div class="form-floating text-muted col-4">
+      <input type="text" name="godzina" class="form-control" placeholder="godzina" required>
+      <label for="floatingPassword" style="padding-left: 1.5rem;">Godzina</label>
+    </div>
+  </div>
+
+  <div class="checkbox my-4 text-start">
+    <label class="checkbox">
+      <input type="checkbox" name="diagnoza" value="diagnoza"> Pakiet diagnostyczny 🔍
+    </label>
+  </div>
+
+  <button class="w-100 btn btn-lg btn-primary my-2" type="submit" id="proceedBtn">Zarezerwuj</button>
+
+</form>
+{% if message %}
+  <p style="color: red;">{{ message }}</p>
+{% endif %}
+{% endblock %}

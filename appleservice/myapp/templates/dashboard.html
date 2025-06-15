@@ -1,0 +1,51 @@
+{% extends "main.htm" %} {% block title %} signin {% endblock %}
+
+{% block content %}
+{% load static %}
+
+<link href="{% static 'dashboard.css' %}" rel="stylesheet">
+
+<div class="b-example-divider mb-3"></div>
+
+<style>
+  .bd-footer{
+    display: none;
+  }
+</style>
+
+<div class="container-fluid">
+  <div class="row CONTAINERROW">
+    <nav id="sidebarMenu" class="col-md-3 col-xl-1 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+          <span>Moduły</span>
+        </h6>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link {% block zl_activity %}{% endblock %}" href="{% url 'Zlecenia' %}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              Zlecenia
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% block fa_activity %}{% endblock %}" href="{% url 'Faktury' %}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              Faktury
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% block ma_activity %}{% endblock %}" href="{% url 'Magazyn' %}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-layers" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+              Magazyn
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <main class="col-md-9 ms-sm-auto col-xl-11 mt-3">
+      {% block board %} {% endblock %}
+    </main>
+  </div>
+</div>
+
+{% endblock %}
