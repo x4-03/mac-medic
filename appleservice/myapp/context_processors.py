@@ -1,3 +1,5 @@
+from .models import *
+
 def session_user(request):
     return {
         'is_logged_in': 'user_id' in request.session,
@@ -5,4 +7,5 @@ def session_user(request):
         'session_email': request.session.get('email'),
         'session_worker': request.session.get('worker'),
         'session_location': request.session.get('location'),
+        'ZLECENIA': Zlecenie.objects.filter(id_klienta = request.session.get('user_id'))
     }

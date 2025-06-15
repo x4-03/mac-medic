@@ -147,8 +147,15 @@
               {% if session_worker %}
               <li> <a class="dropdown-item" href="{% url '_dashboard' %}">📊 Panel pracownika</a></li>
               {% endif %}
+              {% if ZLECENIA %}
+              <li><hr class="dropdown-divider"></li>
+              {% for obj in ZLECENIA %}
+              <li> <a class="dropdown-item" href="">• <strong {% if obj.status_zlecenia == 0 %}style="color: #dc3545;"{% elif obj.status_zlecenia == 1%}style="color: #ffc107;"{% elif obj.status_zlecenia == 2%}style="color: #198754;"{% else %}style="color: #6c757d;"{% endif %} >{{obj.get_status_zlecenia_display}}</strong> {{obj.model}}</a></li>
+              {% endfor %}
+              {% endif %}
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{% url '_logout' %}">⛔ Wyloguj</a></li>
+
             </ul>
           </div>
         {% else %}
