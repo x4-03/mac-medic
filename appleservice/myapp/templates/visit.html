@@ -1,6 +1,21 @@
 {% extends "sign-in.html" %} {% block title %} Umów wizytę {% endblock %}
 {% block form %}
 {% load static %}
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<style>
+  .flatpickr-day.flatpickr-disabled {
+  color: #ccc !important;
+  background: #f9f9f9 !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;  /* Prevent faded opacity if needed */
+}
+</style>
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/pl.js"></script>
 <form method="post" action="{% url 'Rezerwacja' %}" autocomplete="off">
   {% csrf_token %}
 
@@ -12,6 +27,7 @@
     <input type="text" class="form-control" aria-label="Text input with dropdown button" value="" name="model" required>
     <button class="btn btn-outline-secondary dropdown-toggle" style="border-top-right-radius: .3rem; border-bottom-right-radius: .3rem;" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
     <ul class="dropdown-menu dropdown-menu-end">
+      <li><h6 class="dropdown-header">Na przykład:</h6></li>
       <li><a class="dropdown-item" href="#">📱 Iphone 16</a></li>
       <li><a class="dropdown-item" href="#">📱 Iphone 16 Pro</a></li>
       <li><a class="dropdown-item" href="#">📱 Iphone 15</a></li>
@@ -38,20 +54,14 @@
     <label for="floatingSelect">📍 Wybierz lokację</label>
   </div>
 
-  <div class="row my-4">
-    <div class="form-floating text-muted col-8">
-      <input type="text" name="data" class="form-control" placeholder="data" required>
-      <label for="floatingPassword" style="padding-left: 1.5rem;">Data</label>
-    </div>
-    <div class="form-floating text-muted col-4">
-      <input type="text" name="godzina" class="form-control" placeholder="godzina" required>
-      <label for="floatingPassword" style="padding-left: 1.5rem;">Godzina</label>
-    </div>
+  <div class="form-floating text-muted col-12 mt-4">
+    <input type="text" name="termin" id="terminPicker" class="form-control" placeholder="Termin wizyty" required>
+    <label for="terminPicker">🕗 Termin (pn-pt 8-16)</label>
   </div>
 
   <div class="checkbox my-4 text-start">
     <label class="checkbox">
-      <input type="checkbox" name="diagnoza" value="diagnoza"> Pakiet diagnostyczny 🔍
+      <input type="checkbox" name="diagnoza" value="diagnoza"> Pakiet diagnostyczny 🔍 (+20 zł)
     </label>
   </div>
 
@@ -61,4 +71,30 @@
 {% if message %}
   <p style="color: red;">{{ message }}</p>
 {% endif %}
+<script>
+ $('.dropdown-item').on('click', function () {
+    const input = $(this).closest('.input-group').find('input');
+    const cleanText = $(this).text().trim().replace(/^[^\w\d]+/, ''); // remove emoji or symbols at start
+    input.val(cleanText);
+  });
+</script>
+<script>
+  flatpickr("#terminPicker", {
+    dateFormat: "d.m.Y H:i",
+    enableTime: true,
+    time_24hr: true,
+    minuteIncrement: 10,
+    minTime: "08:00",
+    maxTime: "15:50",
+    minDate: new Date().fp_incr(1),
+    maxDate: new Date().fp_incr(60),
+    disable: [
+      function (date) {
+        return (date.getDay() === 0 || date.getDay() === 6);
+      }
+    ],
+    locale: "pl",
+    showMonths: 1,
+  });
+</script>
 {% endblock %}

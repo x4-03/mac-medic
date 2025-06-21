@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, MaxValueValidator
 # Create your models here.
 
 class Lokacja(models.Model):
@@ -38,7 +39,6 @@ def validate_time(value):
     if not (8 <= value.hour < 16):
         raise ValidationError("Wizyta musi być między 8:00 a 16:00!")
     
-    # Check for 10-minute intervals
     if value.minute % 10 != 0:
         raise ValidationError("Terminy wizyt są tylko co 10 minut!")
 
@@ -51,10 +51,10 @@ class Zlecenie(models.Model):
         OCZEKIWANIE = 0, "Oczekiwanie" # od wysłania zlecenia przez klienta do wizyty w salonie
         W_REALIZACJI = 1, "W realizacji" # od wizyty do zakończenia napraw itd.
         ZREALIZOWANO = 2, "Zrealizowano" # klient przychodzi po odbiór w godzinach otwarcia salonu, dostaje fakture/paragon
-        ZARCHIWIZOWANO = 3, "Zarchiwizowano" # urządzenie odebrano; zlecenie wciąż widoczne, zawsze można usunąć z bazy ale po co
+        ZARCHIWIZOWANO = 3, "Zarchiwizowano" # urządzenie odebrano; zlecenie wciąż w bazie, niewidoczne dla klienta
     status_zlecenia = models.IntegerField(choices=Status, default=0)
     termin_zlecenia = models.DateTimeField(validators=[validate_time]) # termin w którym klient przyjdzie na wizyte
-    termin_realizacji = models.DateTimeField(blank=True, null=True) #termin zakończenia prac, nie odbioru. zapisanie terminu odbioru jest nieistotne, po archiwizacji będzie widać że urządzenie odebrano
+    termin_realizacji = models.DateTimeField(blank=True, null=True) #termin w którym klient przyjdzie odebrać urządzenie
     model = models.CharField(max_length=32)
     nr_seryjny = models.CharField(max_length=32, blank=True, null=True)
     pakiet_diagnostyczny = models.BooleanField(default=False)
@@ -69,3 +69,12 @@ class Usluga(models.Model):
 
     def __str__(self):
         return f"{self.service} (Zlecenie #{self.order.id_zlecenia})"
+
+class Czesc(models.Model):
+    nr_seryjny = models.CharField(max_length=32)
+    nazwa = models.CharField(max_length=32)
+    ilosc = models.IntegerField(default=0, validators=[
+            MinValueValidator(0),
+            MaxValueValidator(1024)
+        ])
+    id_lokacji = models.ForeignKey(Lokacja, on_delete=models.CASCADE, default=None)

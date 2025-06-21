@@ -10,6 +10,8 @@ admin.site.register(Klient)
 admin.site.register(Pracownik)
 admin.site.register(Zlecenie)
 admin.site.register(Usluga)
+admin.site.register(Czesc)
+
 
 @admin.register(Session)
 class SessionAdmin(admin.ModelAdmin):

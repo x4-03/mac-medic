@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from .models import *
-from .forms import ServiceFormSet
+from .forms import ServiceFormSet, StorageFormSet
 from time import sleep
 from functools import wraps
 from datetime import datetime
@@ -36,8 +36,50 @@ def not_logged_in(view_func):
     return _wrapped_view
 
 def home(request):
+    oferta = [
+    {
+        "icon": "bi-phone",
+        "title": "Wymiana wyświetlacza",
+        "desc": "Profesjonalna wymiana zbitej lub uszkodzonej szybki i wyświetlacza w iPhone’ach oraz iPadach."
+    },
+    {
+        "icon": "bi-plug",
+        "title": "Naprawa układu ładowania",
+        "desc": "Usuwanie problemów z ładowaniem urządzenia, w tym wymiana portu Lightning oraz układów zasilania."
+    },
+    {
+        "icon": "bi-battery-half",
+        "title": "Wymiana baterii",
+        "desc": "Szybka i bezpieczna wymiana zużytej baterii na nową, oryginalną lub wysokiej jakości zamiennik."
+    },
+    {
+        "icon": "bi-search",
+        "title": "Diagnoza i wycena",
+        "desc": "Diagnoza problemów w okazyjnej cenie, urządzeniem wraz ze wstępną wyceną naprawy."
+    },
+    {
+        "icon": "bi-cloud-download",
+        "title": "Odzyskiwanie danych",
+        "desc": "Ratowanie danych z uszkodzonych iPhone’ów lub iPadów, w tym po zalaniu lub uszkodzeniu płyty głównej."
+    },
+    {
+        "icon": "bi-droplet-half",
+        "title": "Naprawa po zalaniu",
+        "desc": "Kompleksowe czyszczenie i naprawa urządzeń po kontakcie z cieczą – szybka reakcja zwiększa szanse powodzenia."
+    },
+    {
+        "icon": "bi-emoji-smile",
+        "title": "Naprawa Face ID",
+        "desc": "Przywracanie działania systemu rozpoznawania twarzy w urządzeniach Apple z Face ID."
+    },
+    {
+        "icon": "bi-layers",
+        "title": "Wymiana tylnej szybki",
+        "desc": "Precyzyjna wymiana rozbitego szkła na tylnej obudowie iPhone’a przy użyciu specjalistycznego sprzętu."
+    }
+]
     locations = Lokacja.objects.all()
-    return render(request, "home.html", {'locations': locations})
+    return render(request, "home.html", {'locations': locations, 'oferta': oferta})
 
 @not_logged_in
 def login_panel(request):
@@ -135,9 +177,7 @@ def settings_panel(request):
 def dashboard_panel(request):
     return redirect('Zlecenia')
 
-def combine_datetime(data, godzina):
-    return datetime.strptime(f"{data} {godzina}", "%d.%m.%Y %H:%M")
-
+@login_required
 def visit_panel(request):
     locations = Lokacja.objects.all()
     message = ""
@@ -145,7 +185,7 @@ def visit_panel(request):
     if request.method == 'POST':
         
         try: 
-            termin = combine_datetime(request.POST.get("data"), request.POST.get("godzina"))
+            termin = datetime.strptime(f"{request.POST.get("termin")}", "%d.%m.%Y %H:%M")
             validate_time(termin)
         except ValueError: message = "Zły format daty."
         except ValidationError as error: message = error.message
@@ -181,11 +221,23 @@ def faktury_panel(request):
 
 @worker_required
 def magazyn_panel(request):
-    zlecenia = Zlecenie.objects.all()
-    zlecenia_titles = ["ID Zlecenia", "ID Klienta", "ID Pracownika", "Status", "Termin wizyty", "Termin realizacji"]
+    lokacja = Lokacja.objects.get(nazwa_lokacji = request.session.get('location'))
+    
+    magazyn_titles = ["Nazwa", "Nr seryjny", "Ilość", "❌"]
+    if request.method == 'POST':
+        magazyn = StorageFormSet(request.POST, instance = lokacja)
+        if magazyn.is_valid():
+                for item in magazyn:
+                    data = item.cleaned_data
+                    if data and not data.get('nazwa') and not data.get('nr_seryjny'):
+                        data['DELETE'] = True
+                magazyn.save()
+        return redirect('Magazyn')
+    else:
+        magazyn = StorageFormSet(instance = lokacja)
     return render(request, "dashboard/magazyn.html", 
-                  {'zlecenia': zlecenia, 
-                   'zlecenia_titles': zlecenia_titles})
+                  {'magazyn': magazyn, 
+                   'magazyn_titles': magazyn_titles})
 
 @worker_required
 def zlecenia_view(request, zl_id_zlecenia):

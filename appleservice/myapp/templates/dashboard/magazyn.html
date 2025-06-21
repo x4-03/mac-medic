@@ -2,29 +2,129 @@
 {% block ma_activity %}active{% endblock %}
 {% block board %}
 {% load static %}
-<h2><strong>Magazyn</strong> <em>{{ session_location }}</em></h2>
-<div class="table-responsive">
-  <table class="table table-striped table-sm">
-    <thead>
-      <tr>
-        {% for title in zlecenia_titles %}
-        <th scope="col">{{ title }}</th>
-        {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-      {% for zl in zlecenia%}
-      <tr class="dashbar">
-        <td>{{ zl.id_zlecenia }}</td>
-        <td>{{ zl.id_klienta.id }}</td>
-        <td>{{ zl.id_pracownika.id }}</td>
-        <td>{{ zl.status_zlecenia }}</td>
-        <td>{{ zl.termin_zlecenia }}</td>
-        <td>{{ zl.termin_realizacji }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+{% load widget_tweaks %}
+<style>
+  .dashbar{
+    cursor: pointer;
+  }
+  mark {
+  background-color: rgb(212, 255, 76); /* Light yellow (brighter) */
+  color: black;
+  padding: 0 2px;
+  border-radius: 2px;
+  }
+</style>
 
+<h2 class="px-3"><strong>Magazyn</strong> <em>{{ session_location }}</em></h2>
+<div class="p-3">
+  <input type="text" class="form-control w-25 SEARCH" placeholder="Szukaj..." value="">
+</div>
+<form method="post">
+  {% csrf_token %}
+  <div class="table-responsive px-3">
+    {{ magazyn.management_form }}
+    <table class="table table-striped table-sm w-50" id="example">
+      <thead>
+        <tr>
+          {% for title in magazyn_titles %}
+          <th scope="col">{{ title }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody class="align-middle">
+        {% for part in magazyn %}
+          <tr class="dashbar">
+            {{ part.id }}
+            <td>{{ part.nazwa|add_class:"form-control formset-field" }}</td>
+            <td>{{ part.nr_seryjny|add_class:"form-control formset-field" }}</td>
+            <td>{{ part.ilosc|add_class:"form-control formset-field price-field"|attr:"min:0"|attr:"max:1024" }}</td>
+            {% if part.DELETE %}
+            <td class="text-center align-middle">{{ part.DELETE|add_class:"form-check-input formset-check-delete" }}</td>
+            {% endif %}         
+          </tr>
+        {% endfor %}
+      </tbody>      
+    </table>
+    <button type="button" name="add_another" class="btn btn-success px-5">
+      Dodaj kolejne...
+    </button>
+    <button type="submit" name="action" value="SAVE" class="btn btn-secondary SAVEBUTTON mx-2 px-5">
+      ZAPISZ
+    </button>
+  </div>
+</form>
+<script>
+  $("button[name='action']").click(function() {
+    var act = $(this).text()
+    if ($(this).attr('value') != 'SAVE'){
+      var c = confirm("Potwierdź akcję: " + act);
+    }
+    return c;
+  });
+
+  var next_id = $('table.table tr').length - 1
+
+  $("button[name='add_another']").click(function(event) {
+    event.preventDefault();
+    var next_row = $('<tr><td><input type="text" name="czesc_set-' + next_id + '-nazwa" maxlength="256" class="form-control formset-field" id="id_czesc_set-' + next_id + '-nazwa"></td><td><input type="text" name="czesc_set-' + next_id + '-nr_seryjny" maxlength="256" class="form-control formset-field" id="id_czesc_set-' + next_id + '-nr_seryjny"></td><td><input type="number" min="0" name="czesc_set-' + next_id + '-ilosc" step="1" class="form-control formset-field" id="id_czesc_set-' + next_id + '-ilosc"></td><td class="text-center align-middle"><input type="checkbox" name="czesc_set-' + next_id + '-DELETE" class="form-check-input formset-check-delete" id="id_czesc_set-' + next_id + '-DELETE"></td></tr>');
+    $('tbody').append($('<input type="hidden" name="czesc_set-' + next_id + '-id" id="czesc_set-' + next_id + '-id">'))
+    $('table.table').append(next_row)
+    $("input[name='czesc_set-TOTAL_FORMS']").attr('value', parseInt($("input[name='czesc_set-TOTAL_FORMS']").attr('value')) + 1)
+    next_id++
+  });
+
+  $(".form-check-input").click(function (){
+    $(".SAVEBUTTON").removeClass("btn-secondary")
+    $(".SAVEBUTTON").addClass("btn-primary")
+  })
+  $(".form-control").keyup(function (){
+    $(".SAVEBUTTON").removeClass("btn-secondary")
+    $(".SAVEBUTTON").addClass("btn-primary")
+  })
+
+  $(".SAVEBUTTON").click(function (){
+    $("tbody tr").each(function (i, row) {
+      if($(row).find(".formset-field").val() == '' || $(row).find(".price-field").val() == ''){
+        $(row).find(".formset-check-delete").prop( "checked", true )
+      }
+    })
+  })
+</script>
+<script type="text/javascript">
+$(function() {
+  $('.SEARCH').on('keyup', function () {
+    let SEARCH = $(this).val().toLowerCase();
+
+    $('#example tbody tr').each(function () {
+      let match = false;
+
+      $(this).find('td').each(function () {
+        if (!$(this).data('original')) {
+          $(this).data('original', $(this).html());
+        }
+
+        $(this).html($(this).data('original'));
+
+        if ($(this).text().toLowerCase().includes(SEARCH)) {
+          match = true;
+        }
+      });
+
+      if (match && SEARCH !== '') {
+        $(this).prependTo('#example tbody');
+
+        $(this).find('td').each(function () {
+          let html = $(this).html();
+          let regex = new RegExp('(' + SEARCH + ')', 'ig');
+          $(this).html(html.replace(regex, '<mark>$1</mark>'));
+        });
+      }
+    });
+  });
+
+
+
+
+});
+</script>
 {% endblock %}
